@@ -1,0 +1,88 @@
+ou are a senior DevOps architect in your firm and your firm is being approached by Digital Bank, one of the leading online bank providers across Europe. You have been designated with the task of driving an end to end DevOps transformation for DIGITAL BANK. You are supposed to architect an end to end DevOps flow to fulfil the below requirements.
+
+
+
+Below are the Requirements:
+
+Code needs to be migrated to GitHub
+The codebase is currently available in a zipped file in the below location: 
+Continuous Delivery needs to be implemented using Jenkins
+On a Git push, Jenkins job needs to be triggered. This job should contain source code building, testing and packaging stages.
+Implement a one-click deployment. Since this is a banking software we want to ensure only a human can authorise the deployment of the software.
+The deployment package should be containerised in a Docker container.
+Deploy the containerised application in AWS 
+15 instances of the application should be running anytime to ensure availability using Docker Swarms/ Kubernetes Cluster.
+Build a monitoring mechanism to monitor the host systems and services.
+Other Details: This is a sample application that uses Maven as it's build tool
+
+How to compile ?
+
+Execute "mvn clean compile"
+How to execute a test?
+
+JUnit Tests - Execute "mvn clean test"
+How to package the application?
+
+To create a deployment package, execute "mvn clean package"
+
+
+1) push zip file to github
+2) jenkin steps
+   a) run git repository
+mvc clean compil
+mvc clean test
+
+   b) code building, testing and packaging stages
+   c) deployment step
+   d)deploy in docker container
+    image  in docker hub
+
+
+ 3)Deploy the containerised application in AWS 
+4) 15 instances of the application should be running anytime to ensure availability using Docker Swarms/ Kubernetes Cluster.
+
+nagios  to monitor service
+
+https://github.com/AnjuMeleth/spring-petclinic/blob/deploy/Jenkinsfile
+
+pipeline{
+    agent{label 'master'}
+    // agent{label 'slave1'}    
+    tools{
+        maven 'M3'
+    }
+    stages{
+        stage('Checkout'){
+            steps{
+                git 'https://github.com/AnjuMeleth/spring-petclinic.git'
+            }
+        }
+        stage('Build'){
+            steps{
+                 sh 'mvn clean compile'
+            }
+        }
+        stage('Test'){
+            steps{
+                     sh 'mvn test'
+                     junit '**/target/surefire-reports/TEST-*.xml'
+            }
+        }
+        stage('Package'){
+            steps{
+                sh 'mvn package'
+                archiveArtifacts artifacts: 'target/*.jar', fingerprint: true
+            }
+        }
+        stage('Deploy'){
+            steps{
+                    
+		//sh "sudo docker build . -t anjurose/petclinic"
+		//sh "sudo docker run -d -p 8091:8080 anjurose/petclinic"
+                ansiblePlaybook credentialsId: 'ubuntu', disableHostKeyChecking: true, inventory: '/etc/ansible/hosts', playbook: './petclinic_latest.yml' 
+                //sh "sudo /opt/puppetlabs/bin/puppet agent -t"   
+            }
+        }
+    }
+}
+
